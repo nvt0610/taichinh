@@ -1,0 +1,68 @@
+# ── Environment files (bí mật) ───────────────
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+*.env.local
+backend/.env
+backend/.env.local
+backend/.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Giữ lại template env để người khác biết cần config gì
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# ── OS files ────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ──────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+
+# ── Backend: Java/Maven build artifacts ──────
+backend/target/
+backend/*.class
+*.class
+
+# Không ignore backend/.mvn/ vì Maven Wrapper config cần commit.
+# Nếu sau này có wrapper jar binary và muốn bỏ qua, ignore riêng jar:
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# ── Backend: runtime/temp ─────────────────────
+backend/logs/
+backend/*.log
+backend/.attach_pid*
+
+# ── Frontend: Node/Vite build artifacts ──────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/.eslintcache
+frontend/.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Docker ───────────────────────────────────
+# (docker-compose files cần commit, không ignore)
+
+# ── Logs ─────────────────────────────────────
+*.log
+logs/
+
+# ── Test / coverage / temp ───────────────────
+coverage/
+.nyc_output/
+tmp/
+temp/
+.cache/

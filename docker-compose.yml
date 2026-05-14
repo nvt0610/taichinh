@@ -1,0 +1,80 @@
+# ================================================================
+# docker-compose.yml
+# Dùng khi PRODUCTION / sau khi code xong
+# Chạy: docker compose up --build
+# Khởi động đồng thời: DB + Backend + Frontend
+# ================================================================
+
+version: '3.9'
+
+services:
+  # ── Database ─────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: taichinh_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-taichinh_db}
+      POSTGRES_USER: ${DB_USERNAME:-taichinh_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-taichinh_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-taichinh_user} -d ${DB_NAME:-taichinh_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taichinh_network
+
+  # ── Backend (Spring Boot) ─────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: taichinh_backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-taichinh_db}
+      DB_USERNAME: ${DB_USERNAME:-taichinh_user}
+      DB_PASSWORD: ${DB_PASSWORD:-taichinh_pass}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - taichinh_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── Frontend (React + Nginx) ──────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: taichinh_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - taichinh_network
+
+networks:
+  taichinh_network:
+    name: taichinh_network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: taichinh_postgres

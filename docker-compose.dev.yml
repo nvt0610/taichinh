@@ -1,0 +1,31 @@
+# ================================================================
+# docker-compose.dev.yml
+# Dùng trong giai đoạn DEVELOPMENT - chỉ chạy DB
+# FE: npm run dev (localhost:5173)
+# BE: mvn spring-boot:run hoặc chạy trong IDE (localhost:8080)
+# ================================================================
+
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: taichinh_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taichinh_db
+      POSTGRES_USER: taichinh_user
+      POSTGRES_PASSWORD: taichinh_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taichinh_user -d taichinh_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_dev_data:
+    name: taichinh_postgres_dev

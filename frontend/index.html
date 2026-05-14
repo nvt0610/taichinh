@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taichinh FE Probe</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      const log = (...args) => console.log("[FE-CHECK]", ...args);
+
+      async function run() {
+        log("Start connectivity check FE -> BE -> DB");
+        try {
+          const res = await fetch("/api/health");
+          const data = await res.json();
+          log("HTTP status:", res.status);
+          log("Payload:", data);
+          if (res.ok && data.backend === "ok" && data.database === "ok") {
+            log("RESULT: CONNECTED (FE, BE, DB all OK)");
+          } else {
+            log("RESULT: FAILED", data);
+          }
+        } catch (error) {
+          log("RESULT: ERROR", error);
+        }
+      }
+
+      run();
+    </script>
+  </body>
+</html>
