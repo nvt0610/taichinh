@@ -1,144 +1,165 @@
-# 💰 Tài Chính - Personal Finance Tracker
+﻿# TaiChinh MVP - Personal Finance Tracker
 
-Ứng dụng quản lý tài chính cá nhân giúp theo dõi thu nhập, chi tiêu, ví tiền và thống kê tài chính.
+Personal finance tracker for managing wallets, categories, and transactions (income, expense, transfer) with a dashboard summary.
 
-## 🛠 Tech Stack
+## MVP Status
 
-| Layer    | Technology                                          |
-|----------|-----------------------------------------------------|
-| Backend  | Java 21, Spring Boot 3, Spring Security, Spring Data JPA |
-| Database | PostgreSQL 16, Flyway migrations                    |
-| Auth     | JWT (JSON Web Token)                                |
-| Frontend | React 18, TypeScript, Vite                          |
-| DevOps   | Docker, Docker Compose                              |
+MVP backend + frontend is completed and integrated.
+Current focus is UI refactor and UX polish.
 
----
+## Tech Stack
 
-## 📁 Cấu trúc thư mục
+- Backend: Java 21, Spring Boot 3, Spring Security, Spring Data JPA
+- Database: PostgreSQL 16, Flyway
+- Auth: JWT access token + refresh token
+- Frontend: React 18, TypeScript, Vite, Zustand
+- DevOps: Docker, Docker Compose
 
-```
+## Repository Structure
+
+```text
 taichinh/
-├── backend/                          # Spring Boot API
-│   ├── src/main/java/com/taichinh/app/
-│   │   ├── config/                   # SecurityConfig, CorsConfig, JwtConfig
-│   │   ├── controller/               # REST Controllers
-│   │   ├── service/                  # Business Logic
-│   │   ├── repository/               # JPA Repositories
-│   │   ├── entity/                   # JPA Entities
-│   │   ├── dto/                      # Request/Response DTOs
-│   │   ├── security/                 # JWT Filter, UserDetailsService
-│   │   ├── exception/                # Global Exception Handler
-│   │   └── enums/                    # TransactionType, WalletType...
-│   ├── src/main/resources/
-│   │   ├── application.yml           # Dev config
-│   │   ├── application-prod.yml      # Prod config
-│   │   └── db/migration/             # Flyway migrations
-│   ├── Dockerfile                    # Multi-stage Docker build
-│   └── pom.xml                       # Maven dependencies
-│
-├── frontend/                         # React + TypeScript
-│   ├── src/
-│   │   ├── pages/                    # LoginPage, DashboardPage...
-│   │   ├── components/               # Reusable UI components
-│   │   ├── hooks/                    # Custom hooks
-│   │   ├── services/                 # API calls (axios)
-│   │   ├── store/                    # State management (Zustand)
-│   │   ├── types/                    # TypeScript interfaces
-│   │   ├── utils/                    # Helper functions
-│   │   └── constants/                # API_URL, routes...
-│   ├── Dockerfile                    # Multi-stage: Node build + Nginx
-│   ├── nginx.conf                    # Nginx config + API proxy
-│   ├── vite.config.ts
-│   └── package.json
-│
-├── docs/                             # Project documentation
-├── docker-compose.dev.yml            # DEV: chỉ chạy DB
-├── docker-compose.yml                # PROD: DB + BE + FE
-├── .env.example                      # Template env cho docker-compose production
-└── .gitignore
+|- backend/                        # Spring Boot API
+|  |- src/main/java/com/taichinh/app/
+|  |  |- config/
+|  |  |- controller/
+|  |  |- service/
+|  |  |- repository/
+|  |  |- entity/
+|  |  |- dto/
+|  |  |- security/
+|  |  |- exception/
+|  |  `- enums/
+|  |- src/main/resources/
+|  |  |- application.yml
+|  |  |- application-prod.yml
+|  |  `- db/migration/
+|  `- pom.xml
+|- frontend/                       # React app
+|  |- src/
+|  |  |- components/
+|  |  |- pages/
+|  |  |- services/
+|  |  |- store/
+|  |  |- types/
+|  |  `- styles/
+|  `- package.json
+|- docs/
+|  |- IMPLEMENTATION_CHECKLIST.md
+|  |- study/
+|  `- test-results/
+|- docker-compose.dev.yml
+|- docker-compose.yml
+`- README.md
 ```
 
----
+## Implemented Features
 
-## 🚀 Hướng dẫn chạy
+- Authentication
+- Register
+- Login
+- Refresh access token
+- Logout (refresh token revoke)
 
-### Giai đoạn Development
+- Wallet management
+- Create, list, detail, update, soft delete
+- Pagination + search
 
-**Bước 1: Khởi động Database (Docker)**
+- Category management
+- Create, list, detail, update, soft delete
+- Filter by type + pagination + search
+
+- Transaction management
+- Create income / expense / transfer
+- List, detail, update by transaction type, soft delete
+- Wallet balance update rules and ownership checks
+
+- Dashboard
+- Summary endpoint
+- Recent transactions
+- Top spending categories
+- Monthly statistics
+
+- Frontend pages
+- Register/Login
+- Dashboard
+- Wallets
+- Transactions
+- Protected routing + auth store
+
+## API Overview
+
+Base URL (local): `http://localhost:8080`
+
+Public endpoints:
+- `GET /api/health`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
+
+Protected endpoints:
+- Wallets: `/api/wallets`
+- Categories: `/api/categories`
+- Transactions: `/api/transactions`
+- Dashboard: `/api/dashboard/*`
+
+See controllers for exact contracts:
+- [AuthController.java](/f:/Project/taichinh/backend/src/main/java/com/taichinh/app/controller/AuthController.java)
+- [WalletController.java](/f:/Project/taichinh/backend/src/main/java/com/taichinh/app/controller/WalletController.java)
+- [CategoryController.java](/f:/Project/taichinh/backend/src/main/java/com/taichinh/app/controller/CategoryController.java)
+- [TransactionController.java](/f:/Project/taichinh/backend/src/main/java/com/taichinh/app/controller/TransactionController.java)
+- [DashboardController.java](/f:/Project/taichinh/backend/src/main/java/com/taichinh/app/controller/DashboardController.java)
+
+## Run Locally (Development)
+
+1. Start PostgreSQL (dev compose)
+
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
-> PostgreSQL sẽ chạy tại `localhost:5433`
 
-**Bước 2: Chạy Backend**
+2. Start backend
+
 ```bash
 cd backend
-cp .env.example .env   # nếu chưa có file .env local
+cp .env.example .env
 ./mvnw spring-boot:run
-# hoặc mở trong IntelliJ IDEA và Run
 ```
-> Spring Boot API sẽ chạy tại `http://localhost:8080`
-> Backend đang đọc config local từ `backend/.env` qua `spring.config.import`
 
-**Bước 3: Chạy Frontend**
+3. Start frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-> React App sẽ chạy tại `http://localhost:5173`
 
----
+Local URLs:
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8080`
 
-### Giai đoạn Production (sau khi code xong)
+## Run Full Stack (Docker)
 
-**Setup biến môi trường production (root):**
 ```bash
 cp .env.example .env
-# Chỉnh sửa .env với giá trị thật
-```
-
-**Build và chạy tất cả:**
-```bash
 docker compose up --build
 ```
-> App sẽ chạy tại `http://localhost`
 
----
+## Testing and Validation
 
-## 🗃 Database
+Backend tests and integration test reports are tracked in:
+- [docs/test-results](/f:/Project/taichinh/docs/test-results)
 
-- **Host (dev):** `localhost:5433`
-- **Database:** `taichinh_db`
-- **User:** `taichinh_user`
-- **Password:** `taichinh_pass`
+MVP implementation checklist:
+- [docs/IMPLEMENTATION_CHECKLIST.md](/f:/Project/taichinh/docs/IMPLEMENTATION_CHECKLIST.md)
 
-## ⚙️ Quy ước config
+Study notes by backend layer and workflow:
+- [docs/study/README.md](/f:/Project/taichinh/docs/study/README.md)
 
-- `backend/.env`: config local cho Spring Boot backend
-- `backend/.env.example`: template local backend để copy khi setup máy mới
-- `.env.example` ở root: template cho `docker-compose.yml` ở production/full stack
-- `application.yml` và `application-prod.yml` đều import `backend/.env`, sau đó mới fallback về default bằng `${ENV_NAME:default}`
+## Security and Config Notes
 
-Ví dụ local backend:
-
-```bash
-cd backend
-cp .env.example .env
-./mvnw spring-boot:run
-```
-
----
-
-## 📋 API Endpoints (dự kiến)
-
-| Method | Endpoint                    | Mô tả                    |
-|--------|-----------------------------|--------------------------|
-| POST   | /api/auth/register          | Đăng ký tài khoản        |
-| POST   | /api/auth/login             | Đăng nhập, nhận JWT      |
-| GET    | /api/wallets                | Danh sách ví             |
-| POST   | /api/wallets                | Tạo ví mới               |
-| GET    | /api/transactions           | Lịch sử giao dịch        |
-| POST   | /api/transactions           | Thêm giao dịch           |
-| GET    | /api/dashboard/summary      | Tổng quan tài chính      |
-| GET    | /api/categories             | Danh mục chi tiêu        |
+- Do not commit real `.env` files.
+- Use `.env.example` templates.
+- JWT and DB settings are loaded from environment-backed config.
+- API returns standardized response and error format.
