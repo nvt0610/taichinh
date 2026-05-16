@@ -1,5 +1,6 @@
 package com.taichinh.app.controller;
 
+import com.taichinh.app.dto.common.ApiResponse;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,13 +18,14 @@ public class HealthController {
   }
 
   @GetMapping("/health")
-  public ResponseEntity<Map<String, Object>> health() {
+  public ResponseEntity<ApiResponse<Map<String, String>>> health() {
     Integer one = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
     boolean dbOk = one != null && one == 1;
-    return ResponseEntity.ok(
+    Map<String, String> data =
         Map.of(
             "backend", "ok",
             "database", dbOk ? "ok" : "fail",
-            "check", "fe->be->db"));
+            "check", "fe->be->db");
+    return ResponseEntity.ok(ApiResponse.success("Health check completed.", data));
   }
 }

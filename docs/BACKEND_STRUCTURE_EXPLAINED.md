@@ -92,19 +92,23 @@ Lệnh chính trên Windows:
 
 Đang cấu hình:
 
+- `spring.config.import: optional:file:.env[.properties]` để Spring Boot đọc trực tiếp file `backend/.env`
 - DB URL: dùng env `DB_HOST/DB_PORT/DB_NAME`, mặc định `localhost:5433`
 - Username/password DB từ env
 - JPA `ddl-auto: validate`
 - Flyway bật mặc định, đọc migration từ `classpath:db/migration`
 - `baseline-on-migrate: true` để quản lý được DB dev đã có schema sẵn
 - Server port từ env, mặc định `8080`
-- CORS origin mặc định `http://localhost:3000`
+- JWT expiration và refresh expiration đọc từ env, có default an toàn cho local
+- CORS origin mặc định `http://localhost:5173`
 
 ## `application-prod.yml` (production profile)
 
+- Cũng import `backend/.env` bằng `spring.config.import`
 - DB host mặc định `db` (phù hợp docker network)
 - JPA `ddl-auto: validate` (an toàn hơn prod)
 - Flyway bật mặc định để migrate schema khi app start
+- `JWT_SECRET` bắt buộc lấy từ env
 - Logging và CORS theo hướng production
 
 ---
@@ -140,7 +144,11 @@ Hiện project đang ở phase đầu, nhiều folder có `.gitkeep` để giữ
 
 ### `SecurityConfig`
 
-Tạm thời cho phép tất cả request (`permitAll`) để test kết nối nhanh.
+Hiện tại backend đã chạy theo hướng stateless + JWT:
+
+- Public routes: `/api/health`, `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`
+- Protected routes: `/api/wallets/**`, `/api/categories/**`, `/api/transactions/**`, `/api/dashboard/**`
+- `JwtAuthenticationFilter` đọc token `Bearer ...` và set authentication vào Spring Security context
 
 ---
 
@@ -148,8 +156,15 @@ Tạm thời cho phép tất cả request (`permitAll`) để test kết nối n
 
 - `backend/.env`: biến môi trường local cho BE (DB host/port, JWT secret, CORS...)
 - `backend/.env.example`: template chia sẻ cho team
+- `.env` ở root: env cho `docker-compose.yml` full stack
+- `.env.example` ở root: template production/full stack
 
-Các biến này được Spring đọc qua `${ENV_NAME:defaultValue}` trong `application.yml`.
+Điểm quan trọng:
+
+- Spring Boot không tự đọc file `.env` kiểu Node.js.
+- Trong project này, Spring đọc `backend/.env` vì `application.yml` và `application-prod.yml` có `spring.config.import`.
+- Sau khi import file `.env`, các giá trị mới được map vào `${ENV_NAME:defaultValue}`.
+- Nếu biến không có trong `backend/.env`, Spring mới dùng giá trị default trong `application.yml`.
 
 ---
 
@@ -158,6 +173,10 @@ Các biến này được Spring đọc qua `${ENV_NAME:defaultValue}` trong `ap
 - DB chạy container PostgreSQL (map ra local `5433`)
 - BE local kết nối DB qua `localhost:5433`
 - Khi deploy bằng docker-compose full stack, BE có thể dùng host nội bộ `db:5432`
+- Local dev đang khớp sẵn với:
+  - `docker-compose.dev.yml`: Postgres chạy ở `localhost:5433`
+  - `backend/.env`: `DB_HOST=localhost`, `DB_PORT=5433`
+  - `backend/.env`: `CORS_ORIGINS=http://localhost:5173` cho Vite FE
 
 ---
 

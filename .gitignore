@@ -27,6 +27,9 @@ desktop.ini
 .vscode/
 *.iml
 
+# ── Local agent skills ───────────────────────
+.agents/skills/
+
 # ── Backend: Java/Maven build artifacts ──────
 backend/target/
 backend/*.class

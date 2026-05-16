@@ -1,6 +1,8 @@
 spring:
   application:
     name: taichinh-backend
+  config:
+    import: optional:file:.env[.properties]
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:taichinh_db}
@@ -28,13 +30,13 @@ server:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET:taichinh-super-secret-key-change-in-production-min-256-bits}
-  expiration: 86400000   # 1 day in ms
-  refresh-expiration: 604800000   # 7 days in ms
+  secret: ${JWT_SECRET:6a97cf0ec9b546c892c47f5d6e4d872f5cc4a6f1d9e34b7ca240be7d11a5fc92}
+  expiration: ${JWT_EXPIRATION:86400000}   # 1 day in ms
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}   # 7 days in ms
 
 # CORS - cho phép FE gọi vào BE
 cors:
-  allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
+  allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
 
 logging:
   level:

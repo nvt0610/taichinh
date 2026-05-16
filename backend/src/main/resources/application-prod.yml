@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   datasource:
     url: jdbc:postgresql://${DB_HOST:db}:${DB_PORT:5432}/${DB_NAME:taichinh_db}
     username: ${DB_USERNAME}
@@ -16,15 +18,15 @@ spring:
     show-sql: false
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 86400000
-  refresh-expiration: 604800000
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
 cors:
-  allowed-origins: ${CORS_ORIGINS:http://localhost}
+  allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
 
 logging:
   level:

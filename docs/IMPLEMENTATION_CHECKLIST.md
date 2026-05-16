@@ -36,13 +36,12 @@ Backend foundation đã có nền tảng chạy được:
 - Flyway baseline + migration đã có.
 - DB trigger `updated_at` đã có.
 - JPA enums đã có đủ cho MVP hiện tại.
-- JPA entities đang làm dở: mới có `Wallet`.
+- JPA entities đã có đủ các entity chính theo schema MVP.
 
 Current focus:
 
 ```text
 Hoàn thiện Backend Foundation
--> hoàn thiện JPA entities còn lại
 -> tạo Spring Data repositories
 -> chuẩn hóa API response/error
 -> bắt đầu Authentication
@@ -61,22 +60,22 @@ Mục tiêu: hoàn thiện nền tảng backend để các feature auth/domain c
   - [x] `WalletType`
   - [x] `CategoryType`
   - [x] `TransactionType`
-- [~] JPA entities
-  - [ ] `User`
-  - [ ] `Role`
+- [x] JPA entities
+  - [x] `User`
+  - [x] `Role`
   - [x] `Wallet`
-  - [ ] `Category`
-  - [ ] `Transaction`
-  - [ ] `RefreshToken`
-- [ ] Spring Data repositories
-  - [ ] `UserRepository`
-  - [ ] `RoleRepository`
-  - [ ] `WalletRepository`
-  - [ ] `CategoryRepository`
-  - [ ] `TransactionRepository`
-  - [ ] `RefreshTokenRepository`
-- [ ] Global exception handler
-- [ ] API response/error DTO chuẩn
+  - [x] `Category`
+  - [x] `Transaction`
+  - [x] `RefreshToken`
+- [x] Spring Data repositories
+  - [x] `UserRepository`
+  - [x] `RoleRepository`
+  - [x] `WalletRepository`
+  - [x] `CategoryRepository`
+  - [x] `TransactionRepository`
+  - [x] `RefreshTokenRepository`
+- [x] Global exception handler
+- [x] API response/error DTO chuẩn
 
 Definition of Done:
 
@@ -92,31 +91,31 @@ Definition of Done:
 
 Mục tiêu: người dùng có thể đăng ký, đăng nhập, dùng JWT access token và refresh token.
 
-- [ ] BCrypt password hashing
-- [ ] Register API
-  - [ ] Request DTO
-  - [ ] Response DTO
-  - [ ] Validate username/email/password
-  - [ ] Hash password trước khi lưu
-  - [ ] Gán role mặc định `USER`
-- [ ] Login API
-  - [ ] Verify username/email + password
-  - [ ] Trả access token
-  - [ ] Tạo refresh token
-  - [ ] Cập nhật `last_login_at`
-- [ ] JWT access token
-  - [ ] Token service
-  - [ ] Claims cơ bản: user id, username/email, roles
-  - [ ] Expiration config
-- [ ] Refresh token flow
-  - [ ] Lưu refresh token vào DB
-  - [ ] Kiểm tra expired/revoked
-  - [ ] Cấp access token mới
-- [ ] Logout/revoke refresh token
-- [ ] Security filter + protected routes
-  - [ ] JWT filter
-  - [ ] Public routes: health, register, login, refresh
-  - [ ] Protected routes: wallet/category/transaction/dashboard
+- [x] BCrypt password hashing
+- [x] Register API
+  - [x] Request DTO
+  - [x] Response DTO
+  - [x] Validate username/email/password
+  - [x] Hash password trước khi lưu
+  - [x] Gán role mặc định `USER`
+- [x] Login API
+  - [x] Verify username/email + password
+  - [x] Trả access token
+  - [x] Tạo refresh token
+  - [x] Cập nhật `last_login_at`
+- [x] JWT access token
+  - [x] Token service
+  - [x] Claims cơ bản: user id, username/email, roles
+  - [x] Expiration config
+- [x] Refresh token flow
+  - [x] Lưu refresh token vào DB
+  - [x] Kiểm tra expired/revoked
+  - [x] Cấp access token mới
+- [x] Logout/revoke refresh token
+- [x] Security filter + protected routes
+  - [x] JWT filter
+  - [x] Public routes: health, register, login, refresh, logout
+  - [x] Protected routes: wallet/category/transaction/dashboard
 
 Definition of Done:
 
@@ -132,42 +131,42 @@ Definition of Done:
 
 Mục tiêu: người dùng quản lý dữ liệu tài chính cá nhân và hệ thống xử lý số dư chính xác.
 
-- [ ] Wallet CRUD
-  - [ ] Create wallet
-  - [ ] List active wallets theo user
-  - [ ] Update wallet info
-  - [ ] Soft delete wallet
-- [ ] Category CRUD
-  - [ ] Create category
-  - [ ] List categories theo user và type
-  - [ ] Update category
-  - [ ] Soft delete category
+- [x] Wallet CRUD
+  - [x] Create wallet
+  - [x] List active wallets theo user
+  - [x] Update wallet info
+  - [x] Soft delete wallet
+- [x] Category CRUD
+  - [x] Create category
+  - [x] List categories theo user và type
+  - [x] Update category
+  - [x] Soft delete category
   - [ ] Default categories nếu cần
-- [ ] Income transaction
-  - [ ] Tạo giao dịch thu nhập
-  - [ ] Cộng tiền vào wallet
-- [ ] Expense transaction
-  - [ ] Tạo giao dịch chi tiêu
-  - [ ] Trừ tiền khỏi wallet
-- [ ] Transfer transaction
-  - [ ] Chuyển tiền giữa 2 wallet
-  - [ ] Tạo cặp transaction liên kết bằng `reference_transaction_id`
-  - [ ] Cập nhật cả ví nguồn và ví đích
-- [ ] Soft delete behavior
-  - [ ] Không hard delete dữ liệu tài chính
-  - [ ] List API chỉ trả record `deleted_at IS NULL`
-  - [ ] Soft delete transaction có xử lý lại balance
-- [ ] Balance update rules
-  - [ ] Validate amount > 0
-  - [ ] Không cho expense/transfer vượt số dư nếu rule MVP yêu cầu
-  - [ ] Transaction update/delete không làm lệch balance
+- [x] Income transaction
+  - [x] Tạo giao dịch thu nhập
+  - [x] Cộng tiền vào wallet
+- [x] Expense transaction
+  - [x] Tạo giao dịch chi tiêu
+  - [x] Trừ tiền khỏi wallet
+- [x] Transfer transaction
+  - [x] Chuyển tiền giữa 2 wallet
+  - [x] Tạo cặp transaction liên kết bằng `reference_transaction_id`
+  - [x] Cập nhật cả ví nguồn và ví đích
+- [x] Soft delete behavior
+  - [x] Không hard delete dữ liệu tài chính
+  - [x] List API chỉ trả record `deleted_at IS NULL`
+  - [x] Soft delete transaction có xử lý lại balance
+- [x] Balance update rules
+  - [x] Validate amount > 0
+  - [x] Không cho expense/transfer vượt số dư nếu rule MVP yêu cầu
+  - [x] Transaction update/delete không làm lệch balance
 
 Definition of Done:
 
-- CRUD wallet/category chạy được qua API.
-- Income/expense/transfer cập nhật balance đúng.
-- Dữ liệu của user này không lộ sang user khác.
-- Soft delete không làm mất row trong DB.
+- [x] CRUD wallet/category chạy được qua API.
+- [x] Income/expense/transfer cập nhật balance đúng.
+- [x] Dữ liệu của user này không lộ sang user khác.
+- [x] Soft delete không làm mất row trong DB.
 - Các lỗi domain trả về message rõ ràng theo format chuẩn.
 
 ---
@@ -176,13 +175,13 @@ Definition of Done:
 
 Mục tiêu: hiển thị tổng quan tài chính dựa trên dữ liệu thật của user.
 
-- [ ] Total balance
-- [ ] Income/expense summary
-  - [ ] Theo tháng hiện tại
-  - [ ] Theo khoảng thời gian nếu cần
-- [ ] Recent transactions
-- [ ] Top spending categories
-- [ ] Monthly statistics
+- [x] Total balance
+- [x] Income/expense summary
+  - [x] Theo tháng hiện tại
+  - [x] Theo khoảng thời gian nếu cần
+- [x] Recent transactions
+- [x] Top spending categories
+- [x] Monthly statistics
 
 Definition of Done:
 
@@ -197,39 +196,40 @@ Definition of Done:
 
 Mục tiêu: người dùng thao tác được các flow chính trên UI.
 
-- [ ] App shell + routing
-  - [ ] Layout chính
-  - [ ] Protected routes
-  - [ ] Navigation
-- [ ] Auth pages
-  - [ ] Register page
-  - [ ] Login page
-  - [ ] Logout action
-  - [ ] Token persistence
-- [ ] Dashboard page
-  - [ ] Total balance card
-  - [ ] Income/expense summary
-  - [ ] Recent transactions
-  - [ ] Top categories/monthly statistics
-- [ ] Wallet pages
-  - [ ] List wallets
-  - [ ] Create wallet
-  - [ ] Edit wallet
-  - [ ] Delete wallet
-- [ ] Transaction pages
-  - [ ] List transactions
-  - [ ] Create income
-  - [ ] Create expense
-  - [ ] Create transfer
-  - [ ] Filter/search basic
-- [ ] API services
-  - [ ] Axios client
-  - [ ] Auth token interceptor
-  - [ ] Error handling
-- [ ] Zustand stores
-  - [ ] Auth store
-  - [ ] Wallet store
-  - [ ] Transaction/dashboard state nếu cần
+- [x] App shell + routing
+  - [x] Layout chính
+  - [x] Protected routes
+  - [x] Navigation
+- [x] Auth pages
+  - [x] Register page
+  - [x] Login page
+  - [x] Logout action
+  - [x] Token persistence
+- [x] Dashboard page
+  - [x] Total balance card
+  - [x] Income/expense summary
+  - [x] Recent transactions
+  - [x] Top categories/monthly statistics
+- [x] Wallet pages
+  - [x] List wallets
+  - [x] Create wallet
+  - [x] Edit wallet
+  - [x] Delete wallet
+- [x] Transaction pages
+  - [x] List transactions
+  - [x] Create income
+  - [x] Create expense
+  - [x] Create transfer
+  - [x] Filter/search basic
+  - [x] Edit transaction (đúng loại giao dịch)
+  - [x] Delete transaction
+- [x] API services
+  - [x] Axios client
+  - [x] Auth token interceptor
+  - [x] Error handling
+- [x] Zustand stores
+  - [x] Auth store
+  - [x] Wallet/transaction/dashboard state theo MVP (local page state + shared store cần thiết)
 
 Definition of Done:
 
@@ -245,26 +245,26 @@ Definition of Done:
 
 Mục tiêu: ráp toàn bộ MVP thành luồng dùng được từ đầu đến cuối.
 
-- [ ] End-to-end happy path
-  - [ ] Register
-  - [ ] Login
-  - [ ] Create wallet
-  - [ ] Create income
-  - [ ] Create expense
-  - [ ] Create transfer
-  - [ ] View dashboard
-  - [ ] Logout
-- [ ] API error cases
-  - [ ] Unauthorized
-  - [ ] Validation failed
-  - [ ] Not found
-  - [ ] Business rule violation
-- [ ] Data ownership checks
-- [ ] Docker/local run instructions verified
-- [ ] README cập nhật cách chạy MVP
-- [ ] Final build checks
-  - [ ] Backend package
-  - [ ] Frontend build
+- [~] End-to-end happy path
+  - [x] Register
+  - [x] Login
+  - [x] Create wallet
+  - [x] Create income
+  - [x] Create expense
+  - [x] Create transfer
+  - [x] View dashboard
+  - [x] Logout
+- [~] API error cases
+  - [x] Unauthorized
+  - [x] Validation failed
+  - [x] Not found
+  - [x] Business rule violation
+- [x] Data ownership checks
+- [~] Docker/local run instructions verified
+- [~] README cập nhật cách chạy MVP
+- [~] Final build checks
+  - [x] Backend package
+  - [x] Frontend build
 
 Definition of Done:
 
@@ -280,14 +280,13 @@ Definition of Done:
 
 Thứ tự làm tiếp khuyến nghị:
 
-1. Hoàn thiện các JPA entities còn lại: `User`, `Role`, `Category`, `Transaction`, `RefreshToken`.
-2. Tạo Spring Data repositories cho các entity chính.
-3. Thêm API response/error DTO chuẩn và global exception handler.
-4. Bắt đầu Authentication với BCrypt, register API và login API.
-5. Sau khi auth ổn, chuyển sang Wallet CRUD.
+1. Tạo Spring Data repositories cho các entity chính.
+2. Thêm API response/error DTO chuẩn và global exception handler.
+3. Bắt đầu Authentication với BCrypt, register API và login API.
+4. Sau khi auth ổn, chuyển sang Wallet CRUD.
 
 Ghi chú trạng thái hiện tại:
 
 - `JPA enums` đã done vì đã có `WalletType`, `CategoryType`, `TransactionType`.
-- `JPA entities` đang `[~]` vì mới có `Wallet`, chưa có đủ entity theo schema MVP.
+- `JPA entities` đã done vì đã có `User`, `Role`, `Wallet`, `Category`, `Transaction`, `RefreshToken`.
 - Chưa tick repository/auth/core domain cho tới khi có code và verify tương ứng.

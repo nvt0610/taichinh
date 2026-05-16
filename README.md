@@ -54,7 +54,7 @@ taichinh/
 ├── docs/                             # Project documentation
 ├── docker-compose.dev.yml            # DEV: chỉ chạy DB
 ├── docker-compose.yml                # PROD: DB + BE + FE
-├── .env.example                      # Template biến môi trường
+├── .env.example                      # Template env cho docker-compose production
 └── .gitignore
 ```
 
@@ -73,10 +73,12 @@ docker compose -f docker-compose.dev.yml up -d
 **Bước 2: Chạy Backend**
 ```bash
 cd backend
+cp .env.example .env   # nếu chưa có file .env local
 ./mvnw spring-boot:run
 # hoặc mở trong IntelliJ IDEA và Run
 ```
 > Spring Boot API sẽ chạy tại `http://localhost:8080`
+> Backend đang đọc config local từ `backend/.env` qua `spring.config.import`
 
 **Bước 3: Chạy Frontend**
 ```bash
@@ -90,7 +92,7 @@ npm run dev
 
 ### Giai đoạn Production (sau khi code xong)
 
-**Setup biến môi trường:**
+**Setup biến môi trường production (root):**
 ```bash
 cp .env.example .env
 # Chỉnh sửa .env với giá trị thật
@@ -110,6 +112,21 @@ docker compose up --build
 - **Database:** `taichinh_db`
 - **User:** `taichinh_user`
 - **Password:** `taichinh_pass`
+
+## ⚙️ Quy ước config
+
+- `backend/.env`: config local cho Spring Boot backend
+- `backend/.env.example`: template local backend để copy khi setup máy mới
+- `.env.example` ở root: template cho `docker-compose.yml` ở production/full stack
+- `application.yml` và `application-prod.yml` đều import `backend/.env`, sau đó mới fallback về default bằng `${ENV_NAME:default}`
+
+Ví dụ local backend:
+
+```bash
+cd backend
+cp .env.example .env
+./mvnw spring-boot:run
+```
 
 ---
 

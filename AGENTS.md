@@ -29,6 +29,43 @@ GitHub repository:
   - where it sits in the request-to-database flow,
   - how to recognize when it is complete.
 
+## Testing And Result Logging
+
+- When the user asks to test, test thoroughly enough to meaningfully validate the requested slice instead of stopping at compile-only checks when deeper verification is feasible.
+- Record every explicit testing pass in a timestamped batch report under `docs/test-results/`.
+- Use one file per batch with naming format `YYYY-MM-DDTHH-MM-SSZ-<short-slug>.md`.
+- Each batch report should include:
+  - scope being tested,
+  - environment/setup used,
+  - commands executed,
+  - pass/fail result for each major check,
+  - defects found,
+  - fixes applied during the batch if any,
+  - final batch status.
+- When reporting back to the user after testing, summarize the batch result clearly: pass hết hay fail ở đâu, không bỏ qua các lỗi đã gặp giữa chừng.
+
+## Skill Usage
+
+- Use the six role skills as the default routing layer:
+  - `architect-skill` for architecture, roadmap, sequencing, and cross-module decisions.
+  - `po-skill` for requirements, API contracts, payloads, acceptance criteria, and scope decisions.
+  - `db-skill` for schema, migrations, constraints, indexes, query correctness, and data invariants.
+  - `be-skill` for backend APIs, services, auth, domain logic, jobs, integrations, and backend tests.
+  - `fe-skill` for frontend UI, state, forms, API consumption, accessibility, visual QA, and client tests.
+  - `qa-skill` for test plans, regression checks, bug reproduction, test reports, and release confidence.
+- Use specialist workspace skills only when their extra guidance clearly matches the task risk. Examples:
+  - API contract/pagination/error/versioning work: `api-patterns` or `api-design-principles`.
+  - Auth/JWT/permission/IDOR/security-sensitive work: `auth-implementation-patterns` or `security-auditor`.
+  - Frontend API race-safety/client state work: `frontend-api-integration-patterns`.
+  - React/TypeScript/Zustand/Tailwind-specific work: `react-patterns`, `typescript-expert`, `zustand-store-ts`, or `tailwind-patterns`.
+  - UI polish/review/accessibility/browser checks: `frontend-design`, `design-taste-frontend`, `ui-review`, `ui-a11y`, `accessibility-compliance-accessibility-audit`, `playwright-skill`, or `e2e-testing`.
+  - Bugs/test failures: `systematic-debugging`, then the relevant role skill.
+  - Validation after code changes: `lint-and-validate` when it adds value beyond the project-specific testing rule.
+- Do not stack many skills by default. Prefer one role skill plus at most one or two specialist skills for the current slice.
+- If the user explicitly names a skill, use it unless it is unavailable or clearly unsafe for the request.
+- For tiny self-contained tasks, skip extra specialist skills and follow the repository rules directly.
+- Remember that installed skill files and skills loaded in the current session are different states. After skill installs or updates, a new chat or VS Code/Codex reload may be needed before the active skill list reflects the change.
+
 ## Implementation Style
 
 - Prefer the existing Spring Boot package structure:
