@@ -5,6 +5,7 @@ import * as authService from '@/services/authService';
 import type { NormalizedApiError } from '@/types/api';
 import type { AuthUser, LoginRequest, RegisterRequest } from '@/types/auth';
 import { configureAuthHandlers, normalizeApiError } from '@/services/apiClient';
+import { APP_NAME } from '@/config/app';
 
 type AuthStatus = 'idle' | 'loading';
 
@@ -124,7 +125,7 @@ export const useAuthStore = create<AuthStore>()(
         clearSession: () => set(initialState),
       }),
       {
-        name: 'taichinh-auth',
+        name: `${APP_NAME.toLowerCase()}-auth`,
         storage: createJSONStorage(() => localStorage),
         partialize: ({
           accessToken,

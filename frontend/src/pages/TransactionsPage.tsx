@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Pencil, RefreshCw, Trash2, X } from 'lucide-react';
 
 import { normalizeApiError } from '@/services/apiClient';
 import * as categoryService from '@/services/categoryService';
@@ -22,7 +23,7 @@ interface TransactionFormValues {
   walletId: string;
   destinationWalletId: string;
   categoryId: string;
-  amount: number;
+  amount: string;
   title: string;
   note: string;
   transactionDate: string;
@@ -39,6 +40,7 @@ export function TransactionsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
   const [editingMode, setEditingMode] = useState<FormMode | null>(null);
+  const [pendingDeleteTransaction, setPendingDeleteTransaction] = useState<Transaction | null>(null);
 
   const {
     handleSubmit: handleSubmitFilter,
@@ -57,10 +59,11 @@ export function TransactionsPage() {
     handleSubmit,
     register,
     reset,
+    setValue,
     watch,
   } = useForm<TransactionFormValues>({
     defaultValues: {
-      amount: 0,
+      amount: formatCurrencyInput(0),
       categoryId: '',
       destinationWalletId: '',
       mode: 'EXPENSE',
@@ -148,7 +151,7 @@ export function TransactionsPage() {
     try {
       if (values.mode === 'TRANSFER') {
         const payload = {
-          amount: Number(values.amount),
+          amount: parseCurrencyInput(values.amount),
           destinationWalletId: values.destinationWalletId,
           note: values.note,
           sourceWalletId: values.walletId,
@@ -163,7 +166,7 @@ export function TransactionsPage() {
         }
       } else if (values.mode === 'INCOME') {
         const payload = {
-          amount: Number(values.amount),
+          amount: parseCurrencyInput(values.amount),
           categoryId: values.categoryId || undefined,
           note: values.note,
           title: values.title,
@@ -178,7 +181,7 @@ export function TransactionsPage() {
         }
       } else {
         const payload = {
-          amount: Number(values.amount),
+          amount: parseCurrencyInput(values.amount),
           categoryId: values.categoryId || undefined,
           note: values.note,
           title: values.title,
@@ -199,7 +202,7 @@ export function TransactionsPage() {
       setEditingMode(null);
       reset((oldValues) => ({
         ...oldValues,
-        amount: 0,
+        amount: formatCurrencyInput(0),
         categoryId: '',
         note: '',
         title: '',
@@ -214,10 +217,9 @@ export function TransactionsPage() {
   function handleEdit(transaction: Transaction) {
     setError(null);
     setSuccessMessage(null);
-    setEditingTransactionId(transaction.id);
+    setPendingDeleteTransaction(null);
 
     if (transaction.type === 'TRANSFER') {
-      setEditingMode('TRANSFER');
       const counterpart = transactions.find((item) => item.id === transaction.referenceTransactionId);
       const isSource = Number(transaction.amount) < 0;
       const source = isSource ? transaction : counterpart;
@@ -231,8 +233,10 @@ export function TransactionsPage() {
         return;
       }
 
+      setEditingTransactionId(transaction.id);
+      setEditingMode('TRANSFER');
       reset({
-        amount: Math.abs(Number(source.amount)),
+        amount: formatCurrencyInput(Math.abs(Number(source.amount))),
         categoryId: '',
         destinationWalletId: destination.walletId,
         mode: 'TRANSFER',
@@ -244,9 +248,10 @@ export function TransactionsPage() {
       return;
     }
 
+    setEditingTransactionId(transaction.id);
     setEditingMode(transaction.type);
     reset({
-      amount: Number(transaction.amount),
+      amount: formatCurrencyInput(transaction.amount),
       categoryId: transaction.categoryId ?? '',
       destinationWalletId: '',
       mode: transaction.type,
@@ -262,8 +267,9 @@ export function TransactionsPage() {
     setEditingMode(null);
     setError(null);
     setSuccessMessage(null);
+    setPendingDeleteTransaction(null);
     reset({
-      amount: 0,
+      amount: formatCurrencyInput(0),
       categoryId: '',
       destinationWalletId: wallets[0]?.id ?? '',
       mode: 'EXPENSE',
@@ -274,9 +280,8 @@ export function TransactionsPage() {
     });
   }
 
-  async function handleDelete(transaction: Transaction) {
-    const shouldDelete = window.confirm('Xóa giao dịch này?');
-    if (!shouldDelete) {
+  async function confirmDelete() {
+    if (!pendingDeleteTransaction) {
       return;
     }
 
@@ -284,19 +289,20 @@ export function TransactionsPage() {
     setSuccessMessage(null);
 
     try {
-      await transactionService.deleteTransaction(transaction.id);
+      await transactionService.deleteTransaction(pendingDeleteTransaction.id);
       setSuccessMessage('Đã xóa giao dịch.');
       await Promise.all([loadTransactions(), loadBootstrapData()]);
-      if (editingTransactionId === transaction.id) {
+      if (editingTransactionId === pendingDeleteTransaction.id) {
         cancelEdit();
       }
+      setPendingDeleteTransaction(null);
     } catch (caughtError) {
       setError(normalizeApiError(caughtError));
     }
   }
 
   return (
-    <section className="page-stack" aria-labelledby="transactions-title">
+    <section className="page-stack transaction-page" aria-labelledby="transactions-title">
       <div className="page-heading">
         <p className="eyebrow">Transactions</p>
         <h2 id="transactions-title">Giao dịch</h2>
@@ -306,11 +312,15 @@ export function TransactionsPage() {
         <article className="panel">
           <div className="wallet-panel-head">
             <h3>{editingTransactionId ? 'Sửa giao dịch' : 'Tạo giao dịch'}</h3>
-            {editingTransactionId ? (
-              <button className="ghost-button" onClick={cancelEdit} type="button">
-                Hủy sửa
-              </button>
-            ) : null}
+            <button
+              aria-label={editingTransactionId ? 'Hủy sửa giao dịch' : 'Làm mới form'}
+              className="ghost-button icon-button"
+              onClick={cancelEdit}
+              title={editingTransactionId ? 'Hủy sửa' : 'Form mới'}
+              type="button"
+            >
+              {editingTransactionId ? <X size={17} strokeWidth={2.1} /> : <RefreshCw size={17} strokeWidth={2.1} />}
+            </button>
           </div>
           {wallets.length === 0 && !isLoading ? (
             <p>Chưa có ví để tạo giao dịch. Hãy tạo ví trước ở trang Wallets.</p>
@@ -377,15 +387,17 @@ export function TransactionsPage() {
             <label className="form-field">
               <span>Số tiền</span>
               <input
-                step="1000"
-                type="number"
+                inputMode="numeric"
                 {...register('amount', {
-                  min: {
-                    message: 'Số tiền phải lớn hơn 0.',
-                    value: 0.01,
+                  onChange: (event) => {
+                    setValue('amount', formatCurrencyInput(event.target.value), {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
                   },
+                  validate: (value) =>
+                    parseCurrencyInput(value) > 0 || 'Số tiền phải lớn hơn 0.',
                   required: 'Vui lòng nhập số tiền.',
-                  valueAsNumber: true,
                 })}
               />
               <FormError message={errors.amount?.message} />
@@ -456,7 +468,7 @@ export function TransactionsPage() {
           ) : transactions.length === 0 ? (
             <p>Chưa có giao dịch phù hợp với bộ lọc hiện tại.</p>
           ) : (
-            <ul className="simple-list">
+            <ul className="simple-list transaction-list-scroll">
               {transactions.map((transaction) => (
                 <li className="simple-list-row wallet-row" key={transaction.id}>
                   <div>
@@ -471,22 +483,32 @@ export function TransactionsPage() {
                       {formatSignedVnd(transaction.amount, transaction.type)}
                     </strong>
                     <span className="row-meta">{formatDateTime(transaction.transactionDate)}</span>
-                    <div className="wallet-actions">
-                      <button
-                        className="ghost-button"
-                        onClick={() => handleEdit(transaction)}
-                        type="button"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        className="ghost-button wallet-delete"
-                        onClick={() => void handleDelete(transaction)}
-                        type="button"
-                      >
-                        Xóa
-                      </button>
-                    </div>
+                    {editingTransactionId ? (
+                      editingTransactionId === transaction.id ? (
+                        <span className="status-pill">Đang sửa</span>
+                      ) : null
+                    ) : (
+                      <div className="wallet-actions">
+                        <button
+                          aria-label={`Sửa giao dịch ${transaction.title}`}
+                          className="ghost-button icon-button"
+                          onClick={() => handleEdit(transaction)}
+                          title="Sửa"
+                          type="button"
+                        >
+                          <Pencil size={16} strokeWidth={2.1} />
+                        </button>
+                        <button
+                          aria-label={`Xóa giao dịch ${transaction.title}`}
+                          className="ghost-button icon-button wallet-delete"
+                          onClick={() => setPendingDeleteTransaction(transaction)}
+                          title="Xóa"
+                          type="button"
+                        >
+                          <Trash2 size={16} strokeWidth={2.1} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}
@@ -494,6 +516,25 @@ export function TransactionsPage() {
           )}
         </article>
       </section>
+
+      {pendingDeleteTransaction ? (
+        <div className="confirm-toast" role="alertdialog" aria-labelledby="transaction-delete-title">
+          <div>
+            <strong id="transaction-delete-title">Xóa giao dịch này?</strong>
+            <p>
+              Giao dịch "{pendingDeleteTransaction.title}" sẽ được xóa mềm và số dư sẽ được backend xử lý lại.
+            </p>
+          </div>
+          <div className="confirm-toast-actions">
+            <button className="ghost-button" onClick={() => setPendingDeleteTransaction(null)} type="button">
+              Hủy
+            </button>
+            <button className="primary-button danger-button" onClick={() => void confirmDelete()} type="button">
+              Xóa giao dịch
+            </button>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -521,9 +562,13 @@ function toTone(type: TransactionType) {
 }
 
 function formatSignedVnd(value: string | number, type: TransactionType) {
-  const formatted = formatVnd(value);
+  const numericValue = Number(value);
+  const formatted = formatVnd(Math.abs(numericValue));
+
   if (type === 'INCOME') return `+ ${formatted}`;
   if (type === 'EXPENSE') return `- ${formatted}`;
+  if (numericValue < 0) return `- ${formatted}`;
+  if (numericValue > 0) return `+ ${formatted}`;
   return formatted;
 }
 
@@ -533,6 +578,19 @@ function formatVnd(value: string | number) {
     maximumFractionDigits: 0,
     style: 'currency',
   }).format(Number(value));
+}
+
+function parseCurrencyInput(value: string) {
+  const digits = value.replace(/\D/g, '');
+  return digits ? Number(digits) : 0;
+}
+
+function formatCurrencyInput(value: number | string) {
+  const rawNumericValue = typeof value === 'number' ? value : Number(value);
+  const numericValue = Number.isFinite(rawNumericValue) ? rawNumericValue : parseCurrencyInput(String(value));
+  return `${new Intl.NumberFormat('vi-VN', {
+    maximumFractionDigits: 0,
+  }).format(Math.abs(numericValue))} VNĐ`;
 }
 
 function formatDateTime(value: string) {

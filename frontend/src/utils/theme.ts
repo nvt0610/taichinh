@@ -2,16 +2,19 @@ export const themes = {
   'minimal-mint': {
     id: 'minimal-mint',
     name: 'Mint',
+    primaryColor: '#1f9d7a',
     preview: 'linear-gradient(135deg, #1f9d7a, #d9f4ec)',
   },
   'minimal-graphite': {
     id: 'minimal-graphite',
     name: 'Graphite',
+    primaryColor: '#30343b',
     preview: 'linear-gradient(135deg, #30343b, #d9dde5)',
   },
   'minimal-sunrise': {
     id: 'minimal-sunrise',
     name: 'Sunrise',
+    primaryColor: '#d97706',
     preview: 'linear-gradient(135deg, #d97706, #ffedd5)',
   },
 } as const;
@@ -108,7 +111,7 @@ export function generatePalette(primaryColor: string): ThemePalette {
     surfaceMuted: mixHex(primary, '#ffffff', 0.9),
     income: mixHex(primary, '#0b6b53', 0.35),
     expense: mixHex(primary, '#df5c50', 0.8),
-    transfer: mixHex(primary, '#3778bf', 0.82),
+    transfer: mixHex(primary, '#8b7bcf', 0.84),
   };
 }
 

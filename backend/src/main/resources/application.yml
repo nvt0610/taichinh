@@ -1,6 +1,6 @@
 spring:
   application:
-    name: taichinh-backend
+    name: ${APP_NAME:uWallet}-backend
   config:
     import: optional:file:.env[.properties]
 

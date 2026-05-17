@@ -31,3 +31,7 @@ Nguyên tắc:
 ## Ghi chú lịch sử
 
 - `API_RESPONSE_AND_EXCEPTION_STUDY.md` là note cũ dạng gộp; đã tách thành 2 file riêng (`API_RESPONSE_STUDY.md` và `EXCEPTION_HANDLING_STUDY.md`) để học theo layer rõ hơn.
+
+## Ghi chú frontend
+
+- `../FRONTEND_UX_UI_DIRECTION.md`: Định hướng UX/UI đã chốt từ quá trình redesign login, dùng làm chuẩn khi phát triển các trang frontend tiếp theo.

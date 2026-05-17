@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, subscribeWithSelector } from 'zustand/middleware';
 
-import { defaultThemeId, isThemeId, type ThemeId } from '@/utils/theme';
+import { defaultThemeId, isThemeId, themes, type ThemeId } from '@/utils/theme';
+import { APP_NAME } from '@/config/app';
 
 export type ThemeMode = 'auto' | 'manual';
 
@@ -24,7 +25,7 @@ export type ThemeStore = ThemeState & ThemeActions;
 const initialState: ThemeState = {
   themeMode: 'auto',
   themeId: defaultThemeId,
-  primaryColor: '#1f9d7a',
+  primaryColor: themes[defaultThemeId].primaryColor,
   customPalette: {},
 };
 
@@ -33,13 +34,17 @@ export const useThemeStore = create<ThemeStore>()(
     persist(
       (set) => ({
         ...initialState,
-        setTheme: (themeId) => set({ themeId }),
-        setPrimaryColor: (primaryColor) => set({ primaryColor }),
-        setThemeMode: (themeMode) => set({ themeMode }),
+        setTheme: (themeId) => set({ themeId, primaryColor: themes[themeId].primaryColor, themeMode: 'auto' }),
+        setPrimaryColor: (primaryColor) => set({ primaryColor, themeMode: 'manual' }),
+        setThemeMode: (themeMode) =>
+          set((state) => ({
+            themeMode,
+            primaryColor: themeMode === 'auto' ? themes[state.themeId].primaryColor : state.primaryColor,
+          })),
         resetTheme: () => set(initialState),
       }),
       {
-        name: 'taichinh-theme',
+        name: `${APP_NAME.toLowerCase()}-theme`,
         storage: createJSONStorage(() => localStorage),
         partialize: ({ themeMode, themeId, primaryColor, customPalette }) => ({
           themeMode,

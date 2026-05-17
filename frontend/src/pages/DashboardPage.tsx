@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, WalletCards } from 'lucide-react';
 
 import * as dashboardService from '@/services/dashboardService';
 import { normalizeApiError } from '@/services/apiClient';
@@ -127,49 +128,97 @@ export function DashboardPage() {
 
   const metrics = [
     {
+      Icon: WalletCards,
       label: 'Tổng số dư',
       note: 'Từ tất cả ví hiện có',
       tone: 'transfer',
       value: formatVnd(data.summary.totalBalance),
     },
     {
+      Icon: ArrowDownLeft,
       label: 'Thu nhập',
       note: 'Trong kỳ đã chọn',
       tone: 'income',
       value: formatVnd(data.summary.totalIncome),
     },
     {
+      Icon: ArrowUpRight,
       label: 'Chi tiêu',
       note: 'Trong kỳ đã chọn',
       tone: 'expense',
       value: formatVnd(data.summary.totalExpense),
     },
+    {
+      Icon: ArrowLeftRight,
+      label: 'Dòng tiền ròng',
+      note: `${formatDate(data.summary.periodStart)} - ${formatDate(data.summary.periodEnd)}`,
+      tone: Number(data.summary.netCashFlow) >= 0 ? 'income' : 'expense',
+      value: formatSignedVnd(data.summary.netCashFlow, Number(data.summary.netCashFlow) >= 0 ? 'INCOME' : 'EXPENSE'),
+    },
   ] as const;
 
   return (
-    <section className="page-stack" aria-labelledby="dashboard-title">
+    <section className="page-stack dashboard-page" aria-labelledby="dashboard-title">
       <div className="page-heading">
         <p className="eyebrow">Dashboard</p>
         <h2 id="dashboard-title">Tổng quan tháng này</h2>
       </div>
 
-      <div className="metric-grid">
-        {metrics.map((metric) => (
-          <article className="metric-card" key={metric.label}>
-            <span className="metric-label">{metric.label}</span>
-            <strong className="metric-value">{metric.value}</strong>
-            <span className={`metric-note ${metric.tone}`}>{metric.note}</span>
-          </article>
-        ))}
+      <div className="dashboard-metric-grid">
+        {metrics.map((metric) => {
+          const Icon = metric.Icon;
+
+          return (
+            <article className={`metric-card metric-card-${metric.tone}`} key={metric.label}>
+              <div className="metric-card-head">
+                <span className="metric-label">{metric.label}</span>
+                <span className={`metric-icon ${metric.tone}`} aria-hidden="true">
+                  <Icon size={18} strokeWidth={2} />
+                </span>
+              </div>
+              <strong className={`metric-value ${metric.tone}`}>{metric.value}</strong>
+              <span className={`metric-note ${metric.tone}`}>{metric.note}</span>
+            </article>
+          );
+        })}
       </div>
 
-      <section className="panel-grid">
-        <article className="panel">
+      <section className="dashboard-overview-grid">
+        <article className="panel chart-panel dashboard-chart-panel">
+          <h3>Thống kê theo tháng</h3>
+          {monthStats.length === 0 ? (
+            <p>Chưa có dữ liệu thống kê theo tháng.</p>
+          ) : (
+            <div className="chart-wrap">
+              <ResponsiveContainer height={340} width="100%">
+                <BarChart data={monthStats}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--text-muted)" />
+                  <YAxis stroke="var(--text-muted)" tickFormatter={(value) => shortCurrency(value)} />
+                  <Tooltip formatter={(value: number) => formatVnd(value)} />
+                  <Legend />
+                  <Bar dataKey="income" name="Thu nhập" radius={[6, 6, 0, 0]}>
+                    {monthStats.map((item) => (
+                      <Cell fill="var(--chart-income)" key={`income-${item.month}`} />
+                    ))}
+                  </Bar>
+                  <Bar dataKey="expense" name="Chi tiêu" radius={[6, 6, 0, 0]}>
+                    {monthStats.map((item) => (
+                      <Cell fill="var(--chart-expense)" key={`expense-${item.month}`} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </article>
+
+        <article className="panel dashboard-recent-panel">
           <h3>Giao dịch gần đây</h3>
           {data.recentTransactions.length === 0 ? (
             <p>Chưa có giao dịch nào trong tài khoản.</p>
           ) : (
-            <ul className="simple-list">
+            <ul className="simple-list dashboard-recent-list">
               {data.recentTransactions.map((transaction) => (
                 <li className="simple-list-row" key={transaction.id}>
                   <div>
@@ -179,7 +228,7 @@ export function DashboardPage() {
                       {transaction.categoryName ?? 'Không có danh mục'}
                     </p>
                   </div>
-                  <strong className={`row-amount ${toTone(transaction.type)}`}>
+                  <strong className={`row-amount ${toTone(transaction)}`}>
                     {formatSignedVnd(transaction.amount, transaction.type)}
                   </strong>
                 </li>
@@ -187,7 +236,10 @@ export function DashboardPage() {
             </ul>
           )}
         </article>
-        <article className="panel">
+      </section>
+
+      <section className="dashboard-secondary-grid">
+        <article className="panel dashboard-category-panel">
           <h3>Top danh mục</h3>
           {data.topSpendingCategories.length === 0 ? (
             <p>Chưa có chi tiêu theo danh mục trong kỳ.</p>
@@ -208,55 +260,16 @@ export function DashboardPage() {
           )}
         </article>
       </section>
-
-      <article className="panel chart-panel">
-        <h3>Thống kê theo tháng</h3>
-        {monthStats.length === 0 ? (
-          <p>Chưa có dữ liệu thống kê theo tháng.</p>
-        ) : (
-          <div className="chart-wrap">
-            <ResponsiveContainer height={280} width="100%">
-              <BarChart data={monthStats}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" stroke="var(--text-muted)" />
-                <YAxis stroke="var(--text-muted)" tickFormatter={(value) => shortCurrency(value)} />
-                <Tooltip formatter={(value: number) => formatVnd(value)} />
-                <Legend />
-                <Bar dataKey="income" name="Thu nhập" radius={[6, 6, 0, 0]}>
-                  {monthStats.map((item) => (
-                    <Cell fill="var(--chart-income)" key={`income-${item.month}`} />
-                  ))}
-                </Bar>
-                <Bar dataKey="expense" name="Chi tiêu" radius={[6, 6, 0, 0]}>
-                  {monthStats.map((item) => (
-                    <Cell fill="var(--chart-expense)" key={`expense-${item.month}`} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </article>
-
-      <article className="panel">
-        <h3>Dòng tiền ròng</h3>
-        <p className="row-meta">
-          Từ {formatDate(data.summary.periodStart)} đến {formatDate(data.summary.periodEnd)}
-        </p>
-        <strong className={`row-amount ${Number(data.summary.netCashFlow) >= 0 ? 'income' : 'expense'}`}>
-          {formatSignedVnd(data.summary.netCashFlow, Number(data.summary.netCashFlow) >= 0 ? 'INCOME' : 'EXPENSE')}
-        </strong>
-      </article>
     </section>
   );
 }
 
-function toTone(type: DashboardRecentTransaction['type']) {
-  if (type === 'INCOME') {
+function toTone(transaction: DashboardRecentTransaction) {
+  if (transaction.type === 'INCOME') {
     return 'income';
   }
 
-  if (type === 'EXPENSE') {
+  if (transaction.type === 'EXPENSE') {
     return 'expense';
   }
 
@@ -272,7 +285,8 @@ function formatVnd(value: string | number) {
 }
 
 function formatSignedVnd(value: string | number, type: 'INCOME' | 'EXPENSE' | 'TRANSFER') {
-  const formatted = formatVnd(value);
+  const numericValue = Number(value);
+  const formatted = formatVnd(Math.abs(numericValue));
 
   if (type === 'INCOME') {
     return `+ ${formatted}`;
@@ -280,6 +294,14 @@ function formatSignedVnd(value: string | number, type: 'INCOME' | 'EXPENSE' | 'T
 
   if (type === 'EXPENSE') {
     return `- ${formatted}`;
+  }
+
+  if (numericValue < 0) {
+    return `- ${formatted}`;
+  }
+
+  if (numericValue > 0) {
+    return `+ ${formatted}`;
   }
 
   return formatted;
@@ -295,16 +317,22 @@ function formatDate(value: string) {
 
 function shortCurrency(value: number) {
   if (value >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toFixed(1)}B`;
+    return `${formatCompactNumber(value / 1_000_000_000)} tỷ`;
   }
 
   if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}M`;
+    return `${formatCompactNumber(value / 1_000_000)} tr`;
   }
 
   if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(0)}K`;
+    return `${formatCompactNumber(value / 1_000)} nghìn`;
   }
 
-  return String(value);
+  return `${value} VNĐ`;
+}
+
+function formatCompactNumber(value: number) {
+  return new Intl.NumberFormat('vi-VN', {
+    maximumFractionDigits: value >= 10 ? 0 : 1,
+  }).format(value);
 }

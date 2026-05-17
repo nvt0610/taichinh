@@ -1,7 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+import { LoginShowcase } from '@/components/auth/LoginShowcase';
+import { AppIcon } from '@/components/ui/AppIcon';
+import { APP_NAME } from '@/config/app';
 import {
   selectAuthError,
   selectAuthStatus,
@@ -16,6 +20,7 @@ interface RouteState {
   from?: {
     pathname?: string;
   };
+  authTransition?: 'from-register';
 }
 
 export function LoginPage() {
@@ -27,7 +32,9 @@ export function LoginPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const from = (location.state as RouteState | null)?.from?.pathname ?? '/dashboard';
+  const cameFromRegister = (location.state as RouteState | null)?.authTransition === 'from-register';
   const isSubmitting = status === 'loading';
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const {
     formState: { errors },
@@ -53,14 +60,30 @@ export function LoginPage() {
     navigate(from, { replace: true });
   }
 
+  function handleRegisterLinkClick(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    navigate('/register', {
+      state: {
+        authTransition: 'from-login',
+      },
+      viewTransition: true,
+    });
+  }
+
+  const layoutClassName = [
+    'auth-layout',
+    cameFromRegister ? 'auth-layout-enter-from-register' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <main className="auth-layout" aria-labelledby="login-title">
-      <section className="auth-panel">
-        <p className="eyebrow">Taichinh</p>
+    <main className={layoutClassName} aria-labelledby="login-title">
+      <LoginShowcase />
+
+      <section className="auth-panel auth-panel-login">
+        <p className="eyebrow">{APP_NAME}</p>
         <h1 id="login-title">Đăng nhập</h1>
-        <p className="lede">
-          Vào dashboard, ví tiền và giao dịch bằng tài khoản backend thật.
-        </p>
 
         <form className="auth-form" onSubmit={handleSubmit(onSubmit)}>
           <label className="form-field">
@@ -81,22 +104,33 @@ export function LoginPage() {
             />
           </label>
 
-          <label className="form-field">
-            <span>Mật khẩu</span>
-            <input
-              autoComplete="current-password"
-              aria-invalid={Boolean(errors.password || error?.fieldErrors.password)}
-              type="password"
-              {...register('password', {
-                required: 'Vui lòng nhập mật khẩu.',
-                maxLength: {
-                  value: 100,
-                  message: 'Mật khẩu không được vượt quá 100 ký tự.',
-                },
-              })}
-            />
+          <div className="form-field">
+            <label htmlFor="login-password">Mật khẩu</label>
+            <div className="password-input-wrap">
+              <input
+                id="login-password"
+                autoComplete="current-password"
+                aria-invalid={Boolean(errors.password || error?.fieldErrors.password)}
+                type={isPasswordVisible ? 'text' : 'password'}
+                {...register('password', {
+                  required: 'Vui lòng nhập mật khẩu.',
+                  maxLength: {
+                    value: 100,
+                    message: 'Mật khẩu không được vượt quá 100 ký tự.',
+                  },
+                })}
+              />
+              <button
+                aria-label={isPasswordVisible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                className="password-toggle"
+                type="button"
+                onClick={() => setIsPasswordVisible((value) => !value)}
+              >
+                <AppIcon name={isPasswordVisible ? 'eyeOff' : 'eye'} size={18} strokeWidth={2.2} />
+              </button>
+            </div>
             <FormError message={errors.password?.message ?? error?.fieldErrors.password} />
-          </label>
+          </div>
 
           {error ? <p className="form-alert">{error.message}</p> : null}
 
@@ -106,7 +140,10 @@ export function LoginPage() {
         </form>
 
         <p className="auth-link">
-          Chưa có tài khoản? <Link to="/register">Tạo tài khoản</Link>
+          Chưa có tài khoản?{' '}
+          <Link to="/register" onClick={handleRegisterLinkClick}>
+            Tạo tài khoản
+          </Link>
         </p>
       </section>
     </main>
